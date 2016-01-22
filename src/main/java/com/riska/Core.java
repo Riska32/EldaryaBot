@@ -78,6 +78,19 @@ public class Core
     public void run()
     {
         login(loginInfo);
+        Familier familier = new Familier(driver);
+
+        //Перейти к фамильяру и забрать награду
+        familier.getReward();
+
+        //Перейти к минииграм и отыграть миниигры
+        dispatchMiniGames();
+
+        //Перейти к фамильяру и отправить на охоту
+        familier.hunt();
+
+        //Перейти к фамильяру и покормить, если нужно
+        familier.feed();
     }
 
     private void login(LoginInfo _loginInfo)
