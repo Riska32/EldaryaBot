@@ -1,0 +1,102 @@
+Index: src/main/java/com/riska/Core.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/riska/Core.java	(date 1452011492000)
++++ src/main/java/com/riska/Core.java	
+@@ -21,51 +21,49 @@
+ /**
+  * Created by Anastasia on 05.01.2016.
+  */
++
+ public class Core
+ {
+-    public class LoginInfo
+-    {
+-        public String Site;
+-        public String Login;
+-        public String Password;
+ 
+-        public LoginInfo(String site, String login, String password)
+-        {
+-            Site = site;
+-            Login = login;
+-            Password = password;
+-        }
+-    }
+-
+     private WebDriver driver = null;
+ 
++    private LoginInfo loginInfo = null;
++
+     private boolean closeWebDriverWhenError = true;
+ 
+     Map<MiniGameType, String> minigameTypeDict = new HashMap<MiniGameType, String>();
+ 
+     public Core()
+     {
+-        init();
++
+     }
+ 
+-    public void init()
++    public void init(LoginInfo _loginInfo)
+     {
++        loginInfo = _loginInfo;
+         minigameTypeDict.put(MiniGameType.FlowerPawer, "flowerpawer");
+         minigameTypeDict.put(MiniGameType.InsectRush, "insectrush");
+         minigameTypeDict.put(MiniGameType.Baskanoid, "baskanoid");
+ 
+-
+         System.setProperty("webdriver.log.file", "d:\temp\fxlogfile1.log");
+         System.setProperty("webdriver.firefox.logfile", "d:\temp\fxlogfile2.log");
+         System.setProperty("webdriver.edge.driver", "C:\\Program Files (x86)\\Microsoft Web Driver\\MicrosoftWebDriver.exe");
+ 
+-        System.out.println("Start");
+         // Create a new instance of the Firefox driver
+         // Notice that the remainder of the code relies on the interface,
+         // not the implementation.
++
+         final FirefoxProfile firefoxProfile = new FirefoxProfile();
+         firefoxProfile.setPreference("xpinstall.signatures.required", false);
+         firefoxProfile.setEnableNativeEvents(true);
++
++        if (loginInfo.hasProxy())
++        {
++            firefoxProfile.setPreference("network.proxy.type", 1);
++            firefoxProfile.setPreference("network.proxy.http", loginInfo.ProxyHost);
++            firefoxProfile.setPreference("network.proxy.http_port", loginInfo.ProxyPort);
++        }
++
+         driver = new FirefoxDriver(firefoxProfile);
+     }
+ 
+@@ -79,22 +77,22 @@
+     }
+     public void run()
+     {
+-        login(...);
++        login(loginInfo);
+         navigateToGameLobby();
+         dispatchMiniGames();
+     }
+ 
+-    private void login(LoginInfo loginInfo)
++    private void login(LoginInfo _loginInfo)
+     {
+-        driver.get(loginInfo.Site);
++        driver.get(_loginInfo.Site);
+ 
+         // Find the text input element by its name
+         WebElement loginField = driver.findElement(By.id("connexion_email"));
+         WebElement passwordField = driver.findElement(By.id("connexion_pass"));
+ 
+         // Enter something to search for
+-        loginField.sendKeys(loginInfo.Login);
+-        passwordField.sendKeys(loginInfo.Password);
++        loginField.sendKeys(_loginInfo.Login);
++        passwordField.sendKeys(_loginInfo.Password);
+ 
+        // Now submit the form. WebDriver will find the form for us from the element
+         loginField.submit();
