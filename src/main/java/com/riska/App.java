@@ -1,5 +1,7 @@
 package com.riska;
 
+import com.riska.Utils.ThreadHelper;
+
 /**
  * Hello world!
  *
@@ -44,6 +46,12 @@ public class App
                 System.out.println("Unhandled exception: " + ex.getMessage());
             } finally
             {
+                try
+                {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex)
+                {
+                }
                 if (core != null)
                     core.shutdown();
             }

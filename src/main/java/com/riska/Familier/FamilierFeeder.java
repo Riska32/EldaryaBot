@@ -138,30 +138,5 @@ public class FamilierFeeder
         return name;
     }
 
-    public int getEnergyCurrent()
-    {
-        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pet-info-energy span")));
-        String text = element.getText();
-        String regex = "\\((\\d+)/(\\d+)\\)";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(text);
 
-        if (matcher.find())
-        {
-            String current = matcher.group(1);
-            try
-            {
-                return Integer.parseInt(current);
-            }
-            catch (Exception e)
-            {
-                System.out.println("feed: " + e.getMessage());
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
 }
