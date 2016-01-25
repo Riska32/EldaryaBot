@@ -1,5 +1,6 @@
 package com.riska.Familier;
 
+import com.riska.Utils.ThreadHelper;
 import com.riska.logger.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -34,6 +35,7 @@ public class FamilierHunter
 
     public boolean attack(int energyCurrent)
     {
+        ThreadHelper.Sleep(1000);
         List<WebElement> locations = driver.findElements(By.xpath("//div[contains(@class,\"mapLocation tooltip\")]"));
 
         int locSize = locations.size();

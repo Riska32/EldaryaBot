@@ -35,7 +35,7 @@ public class Familier
         goToFamiliar();
         FamilierFeeder familierFeeder = new FamilierFeeder(driver);
 
-        if (getEnergyCurrent() <= minEnergyFamiliar + energyRemoveNight)
+        if (getEnergyCurrent() <= (minEnergyFamiliar + energyRemoveNight))
         {
             WebElement element = driver.findElement(By.cssSelector("#pet-info-food span"));
             if (element.getText().equals("x0"))
@@ -82,8 +82,10 @@ public class Familier
             {
                 if (familierHunter.attack(getEnergyCurrent()))
                 {
+                    ThreadHelper.Sleep(1000);
                     element = regions.get(i).findElement(By.xpath(".//.[contains(@class,\"regionName\")]"));
                     element.click();
+                    ThreadHelper.Sleep(1000);
                     break;
                 }
             }
@@ -97,7 +99,6 @@ public class Familier
         {
             WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#messageBar span")));
             element.click();
-            ThreadHelper.Sleep(5000);
 
             element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("comeback")));
             element.click();

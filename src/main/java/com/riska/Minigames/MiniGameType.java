@@ -1,13 +1,11 @@
-package com.riska.Minigames;
+package com.riska.MiniGames;
 
 /**
- * Created by Anastasia on 05.01.2016.
+ * Created by SteaveP on 25.01.2016.
  */
 public enum MiniGameType
 {
-    Cash,
-    FlowerPawer,
-    InsectRush,
-    Baskanoid,
-    MortalPillow
+    GemBomb,
+    BubblTemple,
+    CocooninPick,
 }

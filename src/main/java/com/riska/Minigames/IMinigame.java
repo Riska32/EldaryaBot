@@ -1,13 +1,12 @@
-package com.riska.Minigames;
+package com.riska.MiniGames;
 
-import com.riska.Exceptions.MinigameException;
+import org.openqa.selenium.WebDriver;
 
 /**
- * Created by Anastasia on 05.01.2016.
+ * Created by SteaveP on 25.01.2016.
  */
-
-public interface IMinigame
+public interface IMiniGame
 {
-    public void Init(InitParams initParams);
-    public void Start() throws MinigameException;
+    public void Init(WebDriver driver);
+    public void Start();
 }

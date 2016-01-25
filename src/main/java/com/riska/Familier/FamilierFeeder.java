@@ -25,7 +25,6 @@ public class FamilierFeeder
 
     public boolean buyFoodForFamiliar(String namefood)
     {
-        ThreadHelper.Sleep(400);
         //Заходим в бутик
         WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("main-menu-mall")));
         element.click();

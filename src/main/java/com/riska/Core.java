@@ -1,12 +1,11 @@
 package com.riska;
 
-import com.riska.Exceptions.MiniGameNotAvailableException;
 import com.riska.Familier.Familier;
-import com.riska.Minigames.IMinigame;
-import com.riska.Minigames.InitParams;
-import com.riska.Minigames.MiniGameType;
-import com.riska.Minigames.MinigameFactory;
-import com.riska.logger.Logger;
+import com.riska.MiniGames.BubblTemple.MiniGameBubblTemple;
+import com.riska.MiniGames.CocooninPick.MiniGameCocooninPick;
+import com.riska.MiniGames.GemBomb.MiniGameGemBomb;
+import com.riska.MiniGames.IMiniGame;
+import com.riska.MiniGames.MiniGameType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -30,8 +29,6 @@ public class Core
 
     private boolean closeWebDriverAtExit = true;
 
-    Map<MiniGameType, String> minigameTypeDict = new HashMap<MiniGameType, String>();
-
     public Core()
     {
 
@@ -40,10 +37,6 @@ public class Core
     public void init(LoginInfo _loginInfo)
     {
         loginInfo = _loginInfo;
-       // minigameTypeDict.put(MiniGameType.FlowerPawer, "flowerpawer");
-       // minigameTypeDict.put(MiniGameType.InsectRush, "insectrush");
-       // minigameTypeDict.put(MiniGameType.Baskanoid, "baskanoid");
-       // minigameTypeDict.put(MiniGameType.MortalPillow, "mortalpillow");
 
         System.setProperty("webdriver.log.file", "d:\temp\fxlogfile1.log");
         System.setProperty("webdriver.firefox.logfile", "d:\temp\fxlogfile2.log");
@@ -75,6 +68,7 @@ public class Core
                 driver.quit();
         }
     }
+
     public void run()
     {
         login(loginInfo);
@@ -84,7 +78,7 @@ public class Core
         familier.getReward();
 
         //Перейти к минииграм и отыграть миниигры
-        dispatchMiniGames();
+        playMiniGames();
 
         //Перейти к фамильяру и отправить на охоту
         familier.hunt();
@@ -105,7 +99,7 @@ public class Core
         loginField.sendKeys(_loginInfo.Login);
         passwordField.sendKeys(_loginInfo.Password);
 
-       // Now submit the form. WebDriver will find the form for us from the element
+        // Now submit the form. WebDriver will find the form for us from the element
         WebElement element = driver.findElement(By.className("button_blue_small"));
         element.click();
 
@@ -120,8 +114,7 @@ public class Core
                     .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("auto-button-pink")));
 
             return buttons;
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return new Vector<WebElement>();
         }
@@ -129,56 +122,43 @@ public class Core
 
     private void goToMiniGames()
     {
-        WebElement element = driver.findElement(By.id("main-menu-minigames"));
+        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("main-menu-minigames")));
         element.click();
     }
 
-    private void dispatchMiniGames()
+    private void playMiniGames()
     {
         goToMiniGames();
-
-        //PlayGame(MiniGameType.Baskanoid);
-        //PlayGame(MiniGameType.InsectRush);
-        //PlayGame(MiniGameType.FlowerPawer);
-        //PlayGame(MiniGameType.MortalPillow);
+        playMiniGame(MiniGameType.GemBomb);
+        playMiniGame(MiniGameType.BubblTemple);
+        playMiniGame(MiniGameType.CocooninPick);
     }
 
-    private void PlayGame(final MiniGameType desired)
+    private void playMiniGame(MiniGameType miniGameType)
     {
-        List<WebElement> buttons = null;
         try
         {
-            buttons = getMiniGameButtons();
+            IMiniGame miniGame = createGame(miniGameType);
+            miniGame.Init(driver);
+            miniGame.Start();
         }
-        catch(Exception ex)
+        catch (Exception e)
         {
-            Logger.inst().Log("Core:PlayGame: exception " + ex.getMessage());
+            System.out.println("PlayMiniGame : " + miniGameType + " : " + e.getMessage());
         }
+    }
 
-        try
+    private IMiniGame createGame(MiniGameType miniGameType) throws Exception
+    {
+        switch (miniGameType)
         {
-            Optional<WebElement> button = buttons.stream().filter(p -> p.getAttribute("href").contains(minigameTypeDict.get(desired))).findFirst();
-
-            if (button.isPresent())
-            {
-                IMinigame minigame = MinigameFactory.Create(desired);
-
-                InitParams initParams = new InitParams(driver, button.get());
-                minigame.Init(initParams);
-                minigame.Start();
-            }
-            else
-            {
-                Logger.inst().Log("Core:PlayGame: " + desired + " not found along " + buttons.size() + " buttons");
-            }
-        }
-        catch (MiniGameNotAvailableException ex)
-        {
-            Logger.inst().Log("Core:PlayGame: " + desired + " not available");
-        }
-        catch (Exception ex)
-        {
-            Logger.inst().Log("Core:PlayGame: " + desired + " exception: " + ex.getMessage());
+            case GemBomb:
+                return new MiniGameGemBomb();
+            case CocooninPick:
+                return new MiniGameCocooninPick();
+            case BubblTemple:
+                return new MiniGameBubblTemple();
+            default: throw new Exception("createGame erorr" + miniGameType);
         }
     }
 }
