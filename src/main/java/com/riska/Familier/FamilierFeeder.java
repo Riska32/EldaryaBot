@@ -36,17 +36,9 @@ public class FamilierFeeder
         element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#mall-categories [data-categorylabel=food] a")));
         element.click();
         //Находим нужную еду
-        namefood = org.apache.commons.lang3.StringEscapeUtils.escapeJava(namefood);
-        Pattern p = Pattern.compile("(\\\\u.{4})", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(namefood);
-
-        String namefood2 = namefood;
-        while (m.find())
-        {
-            namefood2 = namefood2.replace(m.group(1), m.group(1).toLowerCase());
-        }
-        namefood2 = namefood2.replace("\\", "\\\\");
-        element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#mall-products-list [data-product*=\"\\\"name\\\":\\\"" + namefood2 + "\\\"\"]")));
+        //Этот метод может не сработать, если у названия еды на фамильяре и в магазине будут разные регистры
+        element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//li[contains(@class,\"mall-product\") and contains(.,\"" + namefood + "\")]")));
         element.click();
 
         //Покупаем и возращаем результат покупки
