@@ -9,19 +9,9 @@ import org.openqa.selenium.By;
  */
 public class MiniGameBubblTemple extends MiniGamesBase
 {
-    static GameHackParameters gameHackParameters =
-            new GameHackParameters("flappy", 12000, 200);
-
-    @Override
-    protected GameHackParameters GetGameHackParameters()
+    public MiniGameBubblTemple()
     {
-        return gameHackParameters;
-    }
-
-    @Override
-    protected By getEnterButtonCondition()
-    {
-        return By.xpath("//*[@id=\"minigames-flappy\"]/.//*[@class=\"button_purple_big\"]");
+        super(new GameHackParameters("flappy", 12000, 200));
     }
 
     @Override

@@ -12,12 +12,24 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class MiniGamesBase implements IMiniGame
 {
     protected WebDriver driver;
+    protected GameHackParameters gameHackParameters;
+
+    protected int checkAvailablenessWaitSec = 20;
     protected int loadGameWaitSec = 60;
     protected int exitGameWaitSec = 10;
-
     protected int playTimeDelayMSec = 500;
 
     protected By exitGameButtonLocator = By.xpath("//*[contains(@id,\"start-popup\")]/.//*[contains(@class,\"genericPopupClose\")]");
+
+    public MiniGamesBase(GameHackParameters _gameHackParameters)
+    {
+        gameHackParameters = _gameHackParameters;
+
+        /*if (gameHackParameters == null)
+        {
+            throw new Exception();
+        }*/
+    }
 
     @Override
     public void Init(WebDriver page)
@@ -40,6 +52,38 @@ public abstract class MiniGamesBase implements IMiniGame
         exitGame();
     }
 
+    protected WebElement getMinigameEnterBlock(int timeoutSec)
+    {
+        return (new WebDriverWait(driver, timeoutSec)).until(
+                ExpectedConditions.elementToBeClickable(By.xpath( "//*[@id=\"minigames-" + gameHackParameters.GameName + "\"]")));
+    }
+
+    protected boolean checkAvailableness()
+    {
+        try
+        {
+            WebElement element = getMinigameEnterBlock(checkAvailablenessWaitSec);
+
+            return element != null && element.getAttribute("class").toLowerCase().contains("playable");
+        } catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    protected void enterTheGame()
+    {
+        try
+        {
+            WebElement baseElement = getMinigameEnterBlock(checkAvailablenessWaitSec);
+            baseElement.findElement(By.xpath(".//*[class=\"button_purple_big\"")).click();
+        }
+        catch (Exception e)
+        {
+            Logger.inst().Log(getGameName() + " : enterTheGame() exception: " + e.getMessage());
+        }
+    }
+
     private void waitForGameLoad()
     {
         try
@@ -53,32 +97,17 @@ public abstract class MiniGamesBase implements IMiniGame
         }
     }
 
-    protected boolean checkAvailableness()
-    {
-        try
-        {
-            WebElement element = (new WebDriverWait(driver, 3)).until(
-                    ExpectedConditions.elementToBeClickable(getEnterButtonCondition()));
-            return true;
-        } catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    protected void enterTheGame()
-    {
-        WebElement element = driver.findElement(getEnterButtonCondition());
-        element.click();
-    }
-
     protected void hackGame()
     {
         Logger.inst().Log(getGameName() + " : start hack the game");
 
         try
         {
-            GameHackParameters ghp = GetGameHackParameters();
+            if (gameHackParameters == null)
+            {
+                Logger.inst().Log(getGameName() + " : hackGame : GameHackParameters is null");
+                return;
+            }
 
             JavascriptExecutor js = (JavascriptExecutor)driver;
 
@@ -156,9 +185,9 @@ public abstract class MiniGamesBase implements IMiniGame
                 "    });\n" +
                 "}\n" +
                 "\n" +
-                "hackTheGame();", ghp.GameName, ghp.DesiredPlayTimeMSec, ghp.DesiredScore);
+                "hackTheGame();", gameHackParameters.GameName, gameHackParameters.DesiredPlayTimeMSec, gameHackParameters.DesiredScore);
 
-            ThreadHelper.Sleep(ghp.DesiredPlayTimeMSec + playTimeDelayMSec);
+            ThreadHelper.Sleep(gameHackParameters.DesiredPlayTimeMSec + playTimeDelayMSec);
 
             String result_exp = "empty";
             String result_maana = "empty";
@@ -203,9 +232,6 @@ public abstract class MiniGamesBase implements IMiniGame
             Logger.inst().Log(getGameName() + " : exitGame : " + e.getMessage());
         }
     }
-
-    protected abstract By getEnterButtonCondition();
-    protected abstract GameHackParameters GetGameHackParameters();
 
     protected String getGameName()
     {
