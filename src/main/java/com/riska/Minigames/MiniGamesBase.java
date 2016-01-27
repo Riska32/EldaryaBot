@@ -76,7 +76,7 @@ public abstract class MiniGamesBase implements IMiniGame
         try
         {
             WebElement baseElement = getMinigameEnterBlock(checkAvailablenessWaitSec);
-            baseElement.findElement(By.xpath(".//*[class=\"button_purple_big\"")).click();
+            baseElement.findElement(By.xpath(".//*[@class=\"button_purple_big\"]")).click();
         }
         catch (Exception e)
         {
