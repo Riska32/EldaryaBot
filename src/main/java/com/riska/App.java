@@ -2,6 +2,9 @@ package com.riska;
 
 import com.riska.Utils.ThreadHelper;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Hello world!
  *
@@ -35,8 +38,8 @@ public class App
             Core core = null;
             try
             {
-                System.out.println(String.format("Try only %d/%d of %s at %s...",
-                        i + 1, logins.length, li.Login, li.Site));
+                System.out.println(String.format("%s: Try only %d/%d of %s at %s...",
+                        getCurrentTimestamp(), i + 1, logins.length, li.Login, li.Site));
 
                 core = new Core();
                 core.init(li);
@@ -56,5 +59,13 @@ public class App
                     core.shutdown();
             }
         }
+    }
+
+    static String getCurrentTimestamp()
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy");
+        Date now = new Date();
+
+        return dateFormat.format(now);
     }
 }
