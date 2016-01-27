@@ -109,7 +109,7 @@ public class Familier
 
         } catch (Exception e)
         {
-            System.out.println("getReward: " + e.getMessage());
+            //System.out.println("getReward: " + e.getMessage());
         }
     }
 
