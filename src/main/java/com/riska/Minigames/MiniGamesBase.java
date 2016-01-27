@@ -1,4 +1,5 @@
 package com.riska.MiniGames;
+import com.riska.Utils.ThreadHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -30,7 +31,6 @@ public abstract class MiniGamesBase implements IMiniGame
         enterTheGame();
         startGame();
         play();
-        waitGameOver();
         gameOver();
     }
 
@@ -38,7 +38,7 @@ public abstract class MiniGamesBase implements IMiniGame
     {
         try
         {
-            WebElement element = (new WebDriverWait(driver, 5)).until(
+            WebElement element = (new WebDriverWait(driver, 3)).until(
                     ExpectedConditions.presenceOfElementLocated(getEnterButtonCondition()));
             return true;
         } catch (Exception e)
@@ -55,10 +55,11 @@ public abstract class MiniGamesBase implements IMiniGame
 
     protected void startGame()
     {
+        ThreadHelper.Sleep(1000);
         try
         {
             WebElement element = (new WebDriverWait(driver, 60)).until(
-                    ExpectedConditions.presenceOfElementLocated(getStartButtonCondition()));
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@id,\"start-popup\")]/.//*[contains(@class,\"button_blue_big\")]")));
             element.click();
         } catch (Exception e)
         {
@@ -72,12 +73,13 @@ public abstract class MiniGamesBase implements IMiniGame
         try
         {
             WebElement element = (new WebDriverWait(driver, 60)).until(
-                    ExpectedConditions.presenceOfElementLocated(getEndButtonCondition()));
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@id,\"gameOver-popup\")]/.//*[contains(@class,\"button_blue_big\")]")));
             element.click();
         } catch (Exception e)
         {
             System.out.println(getGameName() + " : gameOver : " + e.getMessage());
         }
+        ThreadHelper.Sleep(300);
     }
 
     protected void checkGameOverResult()
@@ -89,16 +91,10 @@ public abstract class MiniGamesBase implements IMiniGame
 
     protected abstract void play();
     protected abstract By getEnterButtonCondition();
-    protected abstract By getStartButtonCondition();
-    protected abstract By getEndButtonCondition();
     protected abstract By getCheckGameOverResultCondition();
     protected int getWaitGameOverTimeSec()
     {
-        return 120;
-    }
-    protected void waitGameOver()
-    {
-
+        return 130;
     }
     protected String getGameName()
     {

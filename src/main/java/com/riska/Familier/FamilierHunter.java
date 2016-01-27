@@ -35,7 +35,7 @@ public class FamilierHunter
 
     public boolean attack(int energyCurrent)
     {
-        ThreadHelper.Sleep(1000);
+        ThreadHelper.Sleep(400);
         List<WebElement> locations = driver.findElements(By.xpath("//div[contains(@class,\"mapLocation tooltip\")]"));
 
         int locSize = locations.size();

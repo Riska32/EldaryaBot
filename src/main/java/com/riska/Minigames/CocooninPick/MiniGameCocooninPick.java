@@ -1,16 +1,19 @@
 package com.riska.MiniGames.CocooninPick;
-
 import com.riska.MiniGames.MiniGamesBase;
+import com.riska.Utils.ThreadHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.interactions.Actions;
+
+import java.util.Random;
 
 /**
  * Created by SteaveP on 25.01.2016.
  */
 public class MiniGameCocooninPick extends MiniGamesBase
 {
+    Random random = new Random();
+
     @Override
     protected void play()
     {
@@ -21,18 +24,6 @@ public class MiniGameCocooninPick extends MiniGamesBase
     protected By getEnterButtonCondition()
     {
         return By.xpath("//*[@id=\"minigames-hatchlings\"]/.//*[@class=\"button_purple_big\"]");
-    }
-
-    @Override
-    protected By getStartButtonCondition()
-    {
-        return By.xpath("//*[@id=\"hatchlings-start-popup\"]/.//*[@class=\"button_blue_big\"]");
-    }
-
-    @Override
-    protected By getEndButtonCondition()
-    {
-        return By.xpath("//*[@id=\"hatchlings-gameOver-popup\"]/.//*[@class=\"button_blue_big\"]");
     }
 
     @Override

@@ -26,6 +26,7 @@ public class FamilierFeeder
     public boolean buyFoodForFamiliar(String namefood)
     {
         //Заходим в бутик
+        ThreadHelper.Sleep(500);
         WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("main-menu-mall")));
         element.click();
         //Заходим в магазин фамильяров
@@ -46,7 +47,7 @@ public class FamilierFeeder
 
     protected boolean buyFood()
     {
-        int maxUnit = 1, needUnit = 5;
+        int maxUnit = 1, needUnit = 3;
         WebElement element = driver.findElement(By.cssSelector("#mall-productDetail-info-maana .button_blue_small"));
         element.click();
         //Считываем максимальное количество единиц, что мы можем купить
@@ -89,6 +90,7 @@ public class FamilierFeeder
         }
         element = driver.findElement(By.id("buyform-submit-btn"));
         element.click();
+        ThreadHelper.Sleep(2000);
     }
 
     public void giveFood()
@@ -102,7 +104,8 @@ public class FamilierFeeder
 
     public void recharger()
     {
-        WebElement element = driver.findElement(By.id("pet-info-food-stock"));
+        ThreadHelper.Sleep(300);
+        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("pet-info-food-stock")));
         element.click();
     }
 

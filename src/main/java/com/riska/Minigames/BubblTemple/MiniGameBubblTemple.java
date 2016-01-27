@@ -25,18 +25,6 @@ public class MiniGameBubblTemple extends MiniGamesBase
     }
 
     @Override
-    protected By getStartButtonCondition()
-    {
-        return By.xpath("//*[@id=\"flappy-start-popup\"]/.//*[@class=\"button_blue_big\"]");
-    }
-
-    @Override
-    protected By getEndButtonCondition()
-    {
-        return By.xpath("//*[@id=\"flappy-gameOver-popup\"]/.//*[@class=\"button_blue_big\"]");
-    }
-
-    @Override
     protected By getCheckGameOverResultCondition()
     {
         return By.xpath("//*[@id=\"flappy-gameOver-score\"]");

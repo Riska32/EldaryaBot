@@ -62,6 +62,7 @@ public class Familier
     public void hunt()
     {
         goToFamiliar();
+        ThreadHelper.Sleep(300);
 
         if (getEnergyCurrent() < minEnergyLoc)
         {
@@ -76,20 +77,20 @@ public class Familier
         {
             WebElement element = regions.get(i);
             element.click();
-            ThreadHelper.Sleep(1000);
+            ThreadHelper.Sleep(700);
 
             if (element.getAttribute("class").contains("selected"))
             {
                 if (familierHunter.attack(getEnergyCurrent()))
                 {
-                    ThreadHelper.Sleep(1000);
-                    element = regions.get(i).findElement(By.xpath(".//.[contains(@class,\"regionName\")]"));
-                    element.click();
-                    ThreadHelper.Sleep(1000);
                     break;
                 }
             }
         }
+        ThreadHelper.Sleep(400);
+        WebElement element = driver.findElement(By.xpath("//li[@class=\"mapRegion tooltip selected\"]"));
+        element.click();
+        ThreadHelper.Sleep(700);
     }
 
     public void getReward()
@@ -99,6 +100,7 @@ public class Familier
         {
             WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#messageBar span")));
             element.click();
+            ThreadHelper.Sleep(200);
 
             element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("comeback")));
             element.click();
