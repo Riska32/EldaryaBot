@@ -1,8 +1,8 @@
 package com.riska.MiniGames;
+
 import com.riska.Utils.ThreadHelper;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import com.riska.logger.Logger;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -12,6 +12,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class MiniGamesBase implements IMiniGame
 {
     protected WebDriver driver;
+    protected int loadGameWaitSec = 60;
+    protected int exitGameWaitSec = 10;
+
+    protected int playTimeDelayMSec = 500;
+
+    protected By exitGameButtonLocator = By.xpath("//*[contains(@id,\"start-popup\")]/.//*[contains(@class,\"genericPopupClose\")]");
 
     @Override
     public void Init(WebDriver page)
@@ -24,14 +30,27 @@ public abstract class MiniGamesBase implements IMiniGame
     {
         if (checkAvailableness() == false)
         {
-            System.out.println(getGameName() + " is not available");
+            Logger.inst().Log(getGameName() + " is not available");
             return;
         }
 
         enterTheGame();
-        startGame();
-        play();
-        gameOver();
+        waitForGameLoad();
+        hackGame();
+        exitGame();
+    }
+
+    private void waitForGameLoad()
+    {
+        try
+        {
+            WebElement element = (new WebDriverWait(driver, loadGameWaitSec)).until(
+                    ExpectedConditions.elementToBeClickable(exitGameButtonLocator));
+        }
+        catch (WebDriverException e)
+        {
+            // continue
+        }
     }
 
     protected boolean checkAvailableness()
@@ -39,7 +58,7 @@ public abstract class MiniGamesBase implements IMiniGame
         try
         {
             WebElement element = (new WebDriverWait(driver, 3)).until(
-                    ExpectedConditions.presenceOfElementLocated(getEnterButtonCondition()));
+                    ExpectedConditions.elementToBeClickable(getEnterButtonCondition()));
             return true;
         } catch (Exception e)
         {
@@ -53,49 +72,141 @@ public abstract class MiniGamesBase implements IMiniGame
         element.click();
     }
 
-    protected void startGame()
+    protected void hackGame()
     {
-        ThreadHelper.Sleep(1000);
+        Logger.inst().Log(getGameName() + " : start hack the game");
+
         try
         {
-            WebElement element = (new WebDriverWait(driver, 60)).until(
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@id,\"start-popup\")]/.//*[contains(@class,\"button_blue_big\")]")));
-            element.click();
-        } catch (Exception e)
+            GameHackParameters ghp = GetGameHackParameters();
+
+            JavascriptExecutor js = (JavascriptExecutor)driver;
+
+            js.executeScript(
+                "currentGame = arguments[0];\n" +
+                "currentGameDelayTimeMilliSecs = arguments[1];\n" +
+                "score_desired = arguments[2];\n" +
+                "\n" +
+                "result_exp = 0;\n" +
+                "result_maana = 0;\n" +
+                "\n" +
+                "function sendDesiredScore(gameToken, score_desired)\n" +
+                "{\n" +
+                "    var emil_e = new EMiL_E();\n" +
+                "    //emil_e.init();\n" +
+                "\n" +
+                "    console.log(\"send game \" + currentGame + \" desired score: \" + score_desired);\n" +
+                "\n" +
+                "    $.ajax({\n" +
+                "        url: '/minigames/ajax_getPrizes',\n" +
+                "        type: 'post',\n" +
+                "        dataType: 'json',\n" +
+                "        data: {game:currentGame, score:score_desired},\n" +
+                "        success: function(json)\n" +
+                "        {\n" +
+                "            console.log(\"Result of ajax query:\");\n" +
+                "            console.log(json);\n" +
+                "\n" +
+                "            console.log(\"result exp=\" + json.exp + \" maana=\" + json.maana);\n" +
+                "            result_exp = json.exp;\n" +
+                "            result_maana = json.maana;\n" +
+                "\n" +
+                "            console.log(\"sending encrypted token with score...\");\n" +
+                "            var enc_token = emil_e.score.xorEncode(gameToken, score_desired.toString());\n" +
+                "            emil_e.score.send(enc_token, score_desired, currentGame);\n" +
+                "            console.log(\"sending encrypted token with score... done\");\n" +
+                "        }\n" +
+                "    }); \n" +
+                "}\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "function hackTheGame()\n" +
+                "{\n" +
+                "    console.log(\"try to get hacked game \" + currentGame + \" token\");\n" +
+                "\n" +
+                "    $.ajax({\n" +
+                "        url: '/minigames/ajax_startGame',\n" +
+                "        type: 'post',\n" +
+                "        dataType: 'json',\n" +
+                "        data: {game:currentGame},\n" +
+                "        success: function(json)\n" +
+                "        {\n" +
+                "            console.log(\"Result of ajax query:\");\n" +
+                "            console.log(json);\n" +
+                "\n" +
+                "\n" +
+                "            if(json.result == 'success')\n" +
+                "            {\n" +
+                "                var gameToken = json.data;\n" +
+                "\n" +
+                "                console.log(\"Success! Game token is \" + gameToken);\n" +
+                "\n" +
+                "                console.log(\"Wait for \" + currentGameDelayTimeMilliSecs + \" milliseconds...\");\n" +
+                "\n" +
+                "                setTimeout(function(){\n" +
+                "                    sendDesiredScore(gameToken, score_desired);\n" +
+                "                }, currentGameDelayTimeMilliSecs);\n" +
+                "            }\n" +
+                "            else\n" +
+                "            {\n" +
+                "                console.log(\"Result is not success, aborting\");\n" +
+                "            }\n" +
+                "        }\n" +
+                "    });\n" +
+                "}\n" +
+                "\n" +
+                "hackTheGame();", ghp.GameName, ghp.DesiredPlayTimeMSec, ghp.DesiredScore);
+
+            ThreadHelper.Sleep(ghp.DesiredPlayTimeMSec + playTimeDelayMSec);
+
+            String result_exp = "empty";
+            String result_maana = "empty";
+
+            try
+            {
+                result_exp = js.executeScript("return result_exp;").toString();
+            }
+            catch (Exception e)
+            {
+                Logger.inst().Log(getGameName() + " : return result_exp exception: " + e.getMessage());
+            }
+
+            try
+            {
+                result_maana = js.executeScript("return result_maana;").toString();
+            }
+            catch (Exception e)
+            {
+                Logger.inst().Log(getGameName() + " : return result_maana exception: " + e.getMessage());
+            }
+
+            // print result to console
+            Logger.inst().Log(getGameName() + " : reward : exp = " + result_exp + " maana = " + result_maana);
+        }
+        catch (Exception e)
         {
-            System.out.println(getGameName() + " : startGame : " + e.getMessage());
+            Logger.inst().Log(getGameName() + " : hackGame js code : " + e.getMessage());
         }
     }
 
-    protected void gameOver()
+    protected void exitGame()
     {
-        checkGameOverResult();
         try
         {
-            WebElement element = (new WebDriverWait(driver, 60)).until(
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@id,\"gameOver-popup\")]/.//*[contains(@class,\"button_blue_big\")]")));
+            WebElement element = (new WebDriverWait(driver, exitGameWaitSec)).until(
+                    ExpectedConditions.elementToBeClickable(exitGameButtonLocator));
             element.click();
-        } catch (Exception e)
-        {
-            System.out.println(getGameName() + " : gameOver : " + e.getMessage());
         }
-        ThreadHelper.Sleep(300);
+        catch (Exception e)
+        {
+            Logger.inst().Log(getGameName() + " : exitGame : " + e.getMessage());
+        }
     }
 
-    protected void checkGameOverResult()
-    {
-        WebElement element = (new WebDriverWait(driver, getWaitGameOverTimeSec())).until(
-                ExpectedConditions.presenceOfElementLocated(getCheckGameOverResultCondition()));
-        System.out.println(getGameName() + " result is : " + element.getText());
-    }
-
-    protected abstract void play();
     protected abstract By getEnterButtonCondition();
-    protected abstract By getCheckGameOverResultCondition();
-    protected int getWaitGameOverTimeSec()
-    {
-        return 130;
-    }
+    protected abstract GameHackParameters GetGameHackParameters();
+
     protected String getGameName()
     {
         return "MiniGameBase";
