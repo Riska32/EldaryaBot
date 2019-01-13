@@ -6,9 +6,6 @@ import com.riska.logger.Logger;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-/**
- * Created by SteaveP on 25.01.2016.
- */
 public abstract class MiniGamesBase implements IMiniGame
 {
     protected WebDriver driver;
@@ -24,11 +21,6 @@ public abstract class MiniGamesBase implements IMiniGame
     public MiniGamesBase(GameHackParameters _gameHackParameters)
     {
         gameHackParameters = _gameHackParameters;
-
-        /*if (gameHackParameters == null)
-        {
-            throw new Exception();
-        }*/
     }
 
     @Override

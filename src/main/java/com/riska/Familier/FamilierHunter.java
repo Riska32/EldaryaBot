@@ -14,9 +14,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by SteaveP on 22.01.2016.
- */
 public class FamilierHunter
 {
     WebDriver driver;
@@ -29,48 +26,61 @@ public class FamilierHunter
 
     public List<WebElement> getRegions()
     {
-        List<WebElement> elements = driver.findElements(By.xpath("//li[contains(@class,\"mapRegion tooltip\")]"));
-        return elements;
+        try
+        {
+            List<WebElement> elements = driver.findElements(By.xpath("//li[contains(@class,\"mapRegion tooltip\")]"));
+            return elements;
+        } catch (Exception e)
+        {
+            System.out.println("getRegions : " + e.getMessage());
+            return null;
+        }
     }
 
     public boolean attack(int energyCurrent)
     {
-        ThreadHelper.Sleep(400);
-        List<WebElement> locations = driver.findElements(By.xpath("//div[contains(@class,\"mapLocation tooltip\")]"));
-
-        int locSize = locations.size();
-
-        for (int i = locSize - 1; i >= 0; i--)
+        try
         {
-            int energyLoc = energyLocation(locations.get(i));
-            if ((energyLoc > energyCurrent) || ((energyCurrent <= Familier.minEnergyFamiliar) && (energyLoc > Familier.minEnergyFamiliar - Familier.minEnergyLoc)))
+            //ThreadHelper.Sleep(400);
+            List<WebElement> locations = driver.findElements(By.xpath("//div[contains(@class,\"mapLocation tooltip\")]"));
+
+            int locSize = locations.size();
+
+            for (int i = locSize - 1; i >= 0; i--)
             {
-                locations.remove(i);
+                int energyLoc = energyLocation(locations.get(i));
+                if ((energyLoc > energyCurrent) || ((energyCurrent <= Familier.minEnergyFamiliar) && (energyLoc > Familier.minEnergyFamiliar - Familier.minEnergyLoc)))
+                {
+                    locations.remove(i);
+                }
             }
-        }
 
-        if (locations.size() != 0)
+            if (locations.size() != 0)
+            {
+                locations.get(random.nextInt(locations.size())).click();
+                WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("explore")));
+                if (element.isDisplayed())
+                {
+                    element.click();
+                }
+                return true;
+            } else return false;
+        } catch (Exception e)
         {
-            locations.get(random.nextInt(locations.size())).click();
-            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("explore")));
-            element.click();
-            return true;
-        }
-        else
+            System.out.println("attack : " + e.getMessage());
             return false;
+        }
     }
 
     protected int energyLocation(WebElement location)
     {
-        String idLocation = location.getAttribute("data-arrayid");
-
-        JavascriptExecutor js = (JavascriptExecutor)driver;
         try
         {
+            String idLocation = location.getAttribute("data-arrayid");
+            JavascriptExecutor js = (JavascriptExecutor) driver;
             String energy = js.executeScript("return mapLocations[" + idLocation + "].energyRequired;").toString();
             return Integer.parseInt(energy);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             Logger.inst().Log("energyLocation : " + ex.getMessage());
             return 1000;

@@ -1,8 +1,5 @@
 package com.riska.MiniGames;
 
-/**
- * Created by Anastasia on 27.01.2016.
- */
 public class GameHackParameters
 {
     public String GameName;

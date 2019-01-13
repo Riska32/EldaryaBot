@@ -1,8 +1,5 @@
 package com.riska;
 
-/**
- * Created by Anastasia on 05.01.2016.
- */
 public class LoginInfo
 {
     public String Site;

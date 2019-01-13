@@ -2,9 +2,6 @@ package com.riska.logger;
 
 import java.util.Date;
 
-/**
- * Created by Anastasia on 05.01.2016.
- */
 public class Logger
 {
     private static Logger ourInstance = new Logger();

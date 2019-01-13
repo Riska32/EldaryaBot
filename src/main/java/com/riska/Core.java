@@ -6,6 +6,7 @@ import com.riska.MiniGames.CocooninPick.MiniGameCocooninPick;
 import com.riska.MiniGames.GemBomb.MiniGameGemBomb;
 import com.riska.MiniGames.IMiniGame;
 import com.riska.MiniGames.MiniGameType;
+import com.riska.Utils.ThreadHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -15,10 +16,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.*;
-
-/**
- * Created by Anastasia on 05.01.2016.
- */
 
 public class Core
 {
@@ -92,8 +89,8 @@ public class Core
         driver.get(_loginInfo.Site);
 
         // Find the text input element by its name
-        WebElement loginField = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("header-login")));
-        WebElement passwordField = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("header-password")));
+        WebElement loginField = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("header-login")));
+        WebElement passwordField = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("header-password")));
 
         // Enter something to search for
         loginField.sendKeys(_loginInfo.Login);
@@ -122,7 +119,8 @@ public class Core
 
     private void goToMiniGames()
     {
-        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("main-menu-minigames")));
+        //driver.navigate().to("http://www.eldarya.com/#/minigames");
+        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("main-menu-minigames")));
         element.click();
     }
 
@@ -132,6 +130,7 @@ public class Core
         playMiniGame(MiniGameType.GemBomb);
         playMiniGame(MiniGameType.BubblTemple);
         playMiniGame(MiniGameType.CocooninPick);
+        ThreadHelper.Sleep(2000);
     }
 
     private void playMiniGame(MiniGameType miniGameType)

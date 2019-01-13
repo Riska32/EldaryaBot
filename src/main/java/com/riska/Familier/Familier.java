@@ -1,6 +1,7 @@
 package com.riska.Familier;
 
 import com.riska.Utils.ThreadHelper;
+import com.riska.logger.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -15,9 +16,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by SteaveP on 21.01.2016.
- */
 public class Familier
 {
     WebDriver driver;
@@ -37,39 +35,54 @@ public class Familier
 
         if (getEnergyCurrent() <= (minEnergyFamiliar + energyRemoveNight))
         {
-            WebElement element = driver.findElement(By.cssSelector("#pet-info-food span"));
-            if (element.getText().equals("x0"))
+            try
             {
-                familierFeeder.recharger();
-
-                if (familierFeeder.maxFoodQuantity() > 0)
+                WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#pet-info-food span")));
+                if (element.getText().equals("x0"))
                 {
-                    familierFeeder.giveFood();
+                    familierFeeder.recharger();
+
+                    if (familierFeeder.maxFoodQuantity() > 0)
+                    {
+                        familierFeeder.giveFood();
+                    } else
+                    {
+                        if (familierFeeder.buyFoodForFamiliar(familierFeeder.nameFood()))
+                        {
+                            goToFamiliar();
+                            familierFeeder.recharger();
+                            familierFeeder.giveFood();
+                        }
+                    }
                 }
                 else
                 {
-                    if (familierFeeder.buyFoodForFamiliar(familierFeeder.nameFood()))
-                    {
-                        goToFamiliar();
-                        familierFeeder.recharger();
-                        familierFeeder.giveFood();
-                    }
+                    System.out.println("Already fed");
                 }
             }
+            catch (Exception e)
+            {
+                System.out.println("Feed : " + e.getMessage());
+            }
+        }
+        else
+        {
+            System.out.println("Food is not required");
         }
     }
 
     public void hunt()
     {
         goToFamiliar();
-        ThreadHelper.Sleep(300);
+        //ThreadHelper.Sleep(300);
 
-        if (getEnergyCurrent() < minEnergyLoc)
+        if ((getEnergyCurrent() < minEnergyLoc) || familierIsBusy())
         {
+            System.out.println("Familiar can't hunt");
             return;
         }
 
-        ThreadHelper.Sleep(200);
+        //ThreadHelper.Sleep(200);
         FamilierHunter familierHunter = new FamilierHunter(driver);
         List<WebElement> regions = familierHunter.getRegions();
 
@@ -77,20 +90,21 @@ public class Familier
         {
             WebElement element = regions.get(i);
             element.click();
-            ThreadHelper.Sleep(700);
+            ThreadHelper.Sleep(500);
 
             if (element.getAttribute("class").contains("selected"))
             {
                 if (familierHunter.attack(getEnergyCurrent()))
                 {
+                    System.out.println("Hunt started");
                     break;
                 }
             }
         }
-        ThreadHelper.Sleep(400);
+        ThreadHelper.Sleep(500);
         WebElement element = driver.findElement(By.xpath("//li[@class=\"mapRegion tooltip selected\"]"));
         element.click();
-        ThreadHelper.Sleep(700);
+        ThreadHelper.Sleep(300);
     }
 
     public void getReward()
@@ -98,51 +112,90 @@ public class Familier
         goToFamiliar();
         try
         {
-            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#messageBar span")));
-            element.click();
             ThreadHelper.Sleep(200);
+            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("treasurehunt-fold")));
+            WebElement messageBarLevel = element.findElement(By.id("messageBarLevel"));
 
-            element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("comeback")));
-            element.click();
+            if (messageBarLevel.isDisplayed() && (messageBarLevel.getAttribute("style") != null) && messageBarLevel.getAttribute("style").equals("width: 100%;"))
+            {
+                element.findElement(By.xpath("//*[@id=\"messageBar\"]/.//span")).click();
+                //ThreadHelper.Sleep(200);
 
-            Boolean result = (new WebDriverWait(driver, 10)).until(ExpectedConditions.invisibilityOfElementLocated(By.id("messageBar")));
+                element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("comeback")));
+                element.click();
+                System.out.println("Get reward done");
+
+                Boolean result = (new WebDriverWait(driver, 10)).until(ExpectedConditions.invisibilityOfElementLocated(By.id("messageBar")));
+            }
+            else
+            {
+                System.out.println("No reward");
+            }
 
         } catch (Exception e)
         {
-            //System.out.println("getReward: " + e.getMessage());
+            System.out.println("getReward: " + e.getMessage());
         }
     }
 
     public void goToFamiliar()
     {
-        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.id("pet-headerPortrait-base")));
-        element.click();
+        //driver.navigate().to("http://www.eldarya.com/#/pet/");
+        try
+        {
+            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("pet-headerPortrait-base")));
+            element.click();
+        }
+        catch (Exception e)
+        {
+            System.out.println("goToFamiliar : " + e.getMessage());
+        }
     }
 
     public int getEnergyCurrent()
     {
-        WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#pet-info-energy span")));
-        String text = element.getText();
-        String regex = "\\((\\d+)/(\\d+)\\)";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(text);
-
-        if (matcher.find())
+        try
         {
-            String current = matcher.group(1);
-            try
+            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#pet-info-energy span")));
+            String text = element.getText();
+            String regex = "\\((\\d+)/(\\d+)\\)";
+            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(text);
+
+            if (matcher.find())
             {
+                String current = matcher.group(1);
                 return Integer.parseInt(current);
-            }
-            catch (Exception e)
+
+            } else
             {
-                System.out.println("feed: " + e.getMessage());
                 return 0;
             }
         }
-        else
+        catch (Exception e)
         {
+            System.out.println("getEnergyCurrent : " + e.getMessage());
             return 0;
+        }
+    }
+
+    public boolean familierIsBusy()
+    {
+        try
+        {
+            WebElement element = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("treasurehunt-fold")));
+            WebElement messageBarLevel = element.findElement(By.id("messageBarLevel"));
+            if (messageBarLevel.isDisplayed())
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        catch (Exception e)
+        {
+            System.out.println("familierIsBusy : " + e.getMessage());
+            return false;
         }
     }
 }
